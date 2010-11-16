@@ -13,7 +13,9 @@ from .abstract import SocialProvider
 class Facebook(SocialProvider):
     service_name = 'facebook'
 
-    def __init__(self, anObject):
+    def __init__(self, request, anObject):
+        self.request = request
+
         access_token = self._get_access_tokens(anObject)
         self._graph = facebook.GraphAPI(access_token)
 
