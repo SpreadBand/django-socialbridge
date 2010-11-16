@@ -17,6 +17,7 @@ class Twitter(SocialProvider):
 
     def __init__(self, request, anObject):
         self.request = request
+        self.object = anObject
 
         self.auth = tweepy.OAuthHandler(settings.OAUTH_ACCESS_SETTINGS[self.service_name]['keys']['KEY'],
                                         settings.OAUTH_ACCESS_SETTINGS[self.service_name]['keys']['SECRET'])

@@ -48,10 +48,12 @@ def post_message(request, anObject, service):
 
             return redirect(anObject)
 
-    context = {'message_form': message_form,
-               'is_associated': (provider is not None)}
+    context = {'service': service,
+               'object': anObject,
+               'message_form': message_form,
+               'provider': provider}
 
-    return render_to_response(template_name='band/socialnets_post_message.html',
+    return render_to_response(template_name='socialbridge/post_message.html',
                               context_instance=RequestContext(request, context)
                               )
 
