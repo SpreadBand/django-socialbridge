@@ -12,15 +12,15 @@ from django.utils.translation import ugettext as _
 from band.models import Band
 
 from .exceptions import NotAssociatedException
-from .providers.twitter import Twitter
-from .providers.fbook import Facebook
-from .forms import SocialMessageForm
+from .forms import SocialMessageForm, SocialBroadcastMessageForm
 
-SERVICES = {'twitter': Twitter,
-            'facebook': Facebook}
+from .models import SERVICES
 
 @login_required
 def post_message(request, anObject, service):
+    """
+    Post a message on the given social network
+    """
     # Check if we know this service
     try:
         provider_class = SERVICES[service]
@@ -59,4 +59,39 @@ def post_message(request, anObject, service):
 
 
 
+def broadcast_message(request, anObject):
+    """
+    Broadcast a message on many social networks
+    """
+    providers = {}
+    for service_name, provider_class in SERVICES.iteritems():
+        # Check if we have an association with this service
+        try:
+            providers[service_name] = provider_class(request, anObject)
+        except NotAssociatedException, e:
+            pass
 
+    message_form = SocialBroadcastMessageForm(request.POST or None)
+
+    if request.method == 'POST':
+        if message_form.is_valid():
+            # Get and post message
+            message = message_form.cleaned_data.get('message')
+    
+            provider.post_message(message)
+            
+            messages.success(request,
+                             _("Your message was successfully broadcasted")
+                             )
+
+            return redirect(anObject)
+
+    context = {'available_services': SERVICES,
+               'object': anObject,
+               'message_form': message_form,
+               'providers': providers}
+
+    return render_to_response(template_name='socialbridge/broadcast_message.html',
+                              context_instance=RequestContext(request, context)
+                              )
+    
