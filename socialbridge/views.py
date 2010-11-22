@@ -77,12 +77,25 @@ def broadcast_message(request, anObject):
         if message_form.is_valid():
             # Get and post message
             message = message_form.cleaned_data.get('message')
-    
-            provider.post_message(message)
+
+            all_published = True
+            for service_name, provider in providers.items():
+                if message_form.cleaned_data.get('publish_on_%s' % service_name, False) is True:
+                    published = provider.post_message(message)
+                    all_published &= published
+                    if not published:
+                        messages.error(request,
+                                       _("Your message couldn't be published on %s" % service_name)
+                                       )
             
-            messages.success(request,
-                             _("Your message was successfully broadcasted")
-                             )
+            if all_published:
+                messages.success(request,
+                                 _("Your message was successfully broadcasted")
+                                 )
+            else:
+                messages.warning(request,
+                                 _("Your message was partially published")
+                                 )
 
             return redirect(anObject)
 

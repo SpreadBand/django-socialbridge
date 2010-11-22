@@ -12,7 +12,8 @@ class SocialBroadcastMessageForm(SocialMessageForm):
         SocialMessageForm.__init__(self, *args, **kwargs)
 
         for service in SERVICES.keys():
-            self.fields["publish_on_%s" % service.lower()] = forms.BooleanField(label=service)
+            self.fields["publish_on_%s" % service.lower()] = forms.BooleanField(label=service,
+                                                                                required=False)
         
     @property
     def services(self):
